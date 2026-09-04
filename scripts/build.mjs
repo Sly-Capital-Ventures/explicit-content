@@ -210,6 +210,60 @@ ${entries}
 `;
 }
 
+// ---------- index (articles.html) ----------
+// The card + grid markup mirror the live explicitsarms.com/articles.html exactly.
+const GRID_OPEN = '<div class="articles-grid">';
+const GRID_TAIL = "</div>\n  </div>\n</section>";
+// Path to the live SARMS articles.html used as the index shell (read-only here).
+const INDEX_SHELL =
+  process.env.SARMS_ARTICLES_HTML ||
+  "C:/Users/Max/Desktop/ExplicitSRMS/articles.html";
+
+function renderCard(meta) {
+  const slug = meta.slug;
+  const img = meta.image || `images/structures/${slug}.png?v=1`;
+  const tag = meta.category || "Peptides";
+  const cardTitle = meta.card_title || meta.title;
+  const excerpt = meta.excerpt || meta.meta_description || "";
+  const term = encodeURIComponent(meta.title);
+  return `      <article class="article-card">
+        <a href="articles/${slug}.html" class="article-card-img">
+          <img src="${escAttr(img)}" alt="${escAttr(meta.title)} molecular structure" loading="lazy" style="filter:invert(1);object-fit:contain;">
+        </a>
+        <div class="article-card-body">
+          <div class="article-tag">${esc(tag)}</div>
+          <h2 class="article-title"><a href="articles/${slug}.html">${esc(cardTitle)}</a></h2>
+          <p class="article-excerpt">${esc(excerpt)}</p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <a href="articles/${slug}.html" class="article-cta">Read Overview →</a>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/?term=${term}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--gray-mid);letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid currentColor;">PubMed Studies ↗</a>
+          </div>
+        </div>
+      </article>`;
+}
+
+function buildIndex(items) {
+  let shell;
+  try {
+    shell = readFileSync(INDEX_SHELL, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+  } catch {
+    console.warn(`! index shell not found at ${INDEX_SHELL} — skipping articles.html`);
+    return false;
+  }
+  const openIdx = shell.indexOf(GRID_OPEN);
+  const tailIdx = shell.indexOf(GRID_TAIL, openIdx);
+  if (openIdx === -1 || tailIdx === -1) {
+    console.warn("! could not locate the articles-grid region in the shell — skipping articles.html");
+    return false;
+  }
+  const cards = items.map(renderCard).join("\n\n");
+  const head = shell.slice(0, openIdx + GRID_OPEN.length);
+  const tail = shell.slice(tailIdx);
+  writeFileSync(join(OUT, "articles.html"), `${head}\n\n${cards}\n\n    ${tail}`, "utf8");
+  writeFileSync(join(OUT, "_index-cards.html"), cards, "utf8");
+  return true;
+}
+
 // ---------- run ----------
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT_ARTICLES, { recursive: true });
@@ -231,4 +285,5 @@ for (const f of files) {
 built.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
 writeFileSync(join(OUT, "feed.xml"), buildFeed(built), "utf8");
 console.log(`✓ feed.xml (${built.length} item${built.length === 1 ? "" : "s"})`);
+if (buildIndex(built)) console.log("✓ articles.html (index regenerated)");
 console.log(`\nBuilt ${built.length} article(s) into dist/`);
