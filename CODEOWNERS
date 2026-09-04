@@ -1,0 +1,11 @@
+# Every merge to main needs an Explicit reviewer's approval — this is the human
+# gate. Combined with branch protection ("Require review from Code Owners"),
+# nothing Craig's team or their AI opens can merge itself.
+#
+# Change @msly19 to an org team (e.g. @Sly-Capital-Ventures/explicit-reviewers)
+# once the reviewer team exists.
+*        @msly19
+
+# The ruleset itself is doubly protected: the compliance agent reads it from the
+# base branch (a PR can't weaken its own gate), and edits to it need review here.
+/brain/  @msly19

@@ -1,0 +1,73 @@
+name: Compliance Review
+
+# Runs on every PR that touches content/. Posts a plain-English report as a PR
+# comment and fails the check (blocking merge) if any claim is found. Same-repo
+# PRs (collaborators pushing a branch here) get the secret; fork PRs won't, and
+# then the agent can't run and the check fails safe — a human reviews.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'content/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: compliance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install SDK
+        run: pip install --quiet 'anthropic>=0.40'
+
+      - name: Run compliance review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python scripts/compliance_review.py
+
+      - name: Post / update review comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [ ! -f compliance-report.md ]; then
+            printf '## Compliance review\n\nThe compliance agent hit an internal error and could not run. A human must review this PR.\n' > compliance-report.md
+            printf 'FAIL\n' > compliance-status.txt
+          fi
+          marker='<!-- compliance-agent -->'
+          printf '%s\n%s' "$marker" "$(cat compliance-report.md)" > .comment-body
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq "map(select(.body | startswith(\"$marker\"))) | .[0].id // empty" 2>/dev/null | head -n1)
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@.comment-body >/dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@.comment-body >/dev/null
+          fi
+
+      - name: Enforce verdict
+        if: always()
+        run: |
+          if [ ! -f compliance-status.txt ] || ! grep -qx 'PASS' compliance-status.txt; then
+            echo "Compliance check did not pass — see the PR comment for the specific fixes."
+            exit 1
+          fi
+          echo "Compliance check passed."
