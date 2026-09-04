@@ -211,9 +211,12 @@ ${entries}
 }
 
 // ---------- index (articles.html) ----------
-// The card + grid markup mirror the live explicitsarms.com/articles.html exactly.
-const GRID_OPEN = '<div class="articles-grid">';
-const GRID_TAIL = "</div>\n  </div>\n</section>";
+// The card markup mirrors the live explicitsarms.com/articles.html exactly.
+// Insertion is NON-DESTRUCTIVE: the build only ever rewrites the region between
+// these two marker comments, so hand-authored/legacy cards outside them survive.
+// One-time cutover: place these markers inside <div class="articles-grid">.
+const MARK_START = "<!-- AUTO-ARTICLES:START -->";
+const MARK_END = "<!-- AUTO-ARTICLES:END -->";
 // Path to the live SARMS articles.html used as the index shell (read-only here).
 const INDEX_SHELL =
   process.env.SARMS_ARTICLES_HTML ||
@@ -250,17 +253,20 @@ function buildIndex(items) {
     console.warn(`! index shell not found at ${INDEX_SHELL} — skipping articles.html`);
     return false;
   }
-  const openIdx = shell.indexOf(GRID_OPEN);
-  const tailIdx = shell.indexOf(GRID_TAIL, openIdx);
-  if (openIdx === -1 || tailIdx === -1) {
-    console.warn("! could not locate the articles-grid region in the shell — skipping articles.html");
+  const startIdx = shell.indexOf(MARK_START);
+  const endIdx = shell.indexOf(MARK_END, startIdx);
+  const cards = items.map(renderCard).join("\n\n");
+  writeFileSync(join(OUT, "_index-cards.html"), cards, "utf8");
+  if (startIdx === -1 || endIdx === -1) {
+    console.warn(
+      "! index markers not found in the shell (AUTO-ARTICLES:START/END) — wrote cards to dist/_index-cards.html only.\n" +
+      "  Add the two markers inside <div class=\"articles-grid\"> once, then re-run to generate articles.html."
+    );
     return false;
   }
-  const cards = items.map(renderCard).join("\n\n");
-  const head = shell.slice(0, openIdx + GRID_OPEN.length);
-  const tail = shell.slice(tailIdx);
-  writeFileSync(join(OUT, "articles.html"), `${head}\n\n${cards}\n\n    ${tail}`, "utf8");
-  writeFileSync(join(OUT, "_index-cards.html"), cards, "utf8");
+  const head = shell.slice(0, startIdx + MARK_START.length);
+  const tail = shell.slice(endIdx);
+  writeFileSync(join(OUT, "articles.html"), `${head}\n\n${cards}\n\n      ${tail}`, "utf8");
   return true;
 }
 
