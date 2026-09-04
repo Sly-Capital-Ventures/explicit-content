@@ -6,6 +6,7 @@ backend:
   name: github
   repo: Sly-Capital-Ventures/explicit-content   # change if the repo lands elsewhere
   branch: main
+  base_url: https://sveltia-cms-auth.sweet-hill-e42e.workers.dev   # GitHub OAuth relay (Cloudflare Worker)
 
 # THE GATE: editorial_workflow makes "Save draft" / "Submit for review" open a PR.
 # Writers can draft and submit freely; only our side merges. This is the compliance gate.
