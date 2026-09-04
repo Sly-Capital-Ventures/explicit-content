@@ -1,0 +1,7 @@
+# Content-only repo — nothing sensitive should ever live here.
+.DS_Store
+Thumbs.db
+node_modules/
+*.log
+.env
+.env.*

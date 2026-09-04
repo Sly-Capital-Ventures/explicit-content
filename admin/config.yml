@@ -1,0 +1,54 @@
+# Sveltia / Decap CMS config for the Explicit content studio.
+# Target site: explicitsarms.com  (ER keeps its own existing article library)
+# Every save is a Pull Request — nothing reaches the live site without review + merge.
+
+backend:
+  name: github
+  repo: Sly-Capital-Ventures/explicit-content   # change if the repo lands elsewhere
+  branch: main
+
+# THE GATE: editorial_workflow makes "Save draft" / "Submit for review" open a PR.
+# Writers can draft and submit freely; only our side merges. This is the compliance gate.
+publish_mode: editorial_workflow
+
+media_folder: "content/uploads"
+public_folder: "/uploads"
+
+site_url: https://explicitsarms.com
+display_url: https://explicitsarms.com
+logo_url: https://storage.mlcdn.com/account_image/427611/f10gCzaubDiqbVUAtymjYK0whelSyyMspw0u3p80.png
+
+collections:
+  # ── New research articles ─────────────────────────────────────────────
+  - name: articles
+    label: "Articles"
+    label_singular: "Article"
+    description: "New research articles for explicitsarms.com. Identity + chemistry + catalog facts only — never what a compound does in a body. See brain/compliance.md."
+    folder: "content/articles"
+    create: true
+    slug: "{{fields.slug}}"
+    fields:
+      - { label: "Title (H1)", name: "title", widget: "string", hint: "The on-page headline. No health/efficacy claims." }
+      - { label: "URL slug", name: "slug", widget: "string", pattern: ['^[a-z0-9-]+$', "lowercase letters, numbers and hyphens only"] }
+      - { label: "Meta title", name: "meta_title", widget: "string", hint: "~60 chars — the clickable title in Google results." }
+      - { label: "Meta description", name: "meta_description", widget: "text", hint: "~155 chars. Identity/product facts only — no claims." }
+      - { label: "Focus keyword", name: "focus_keyword", widget: "string", required: false }
+      - { label: "Featured image", name: "image", widget: "image", required: false }
+      - { label: "Publish date", name: "date", widget: "datetime", default: "" }
+      - { label: "Body", name: "body", widget: "markdown", hint: "Identity, chemistry, catalog + COA facts. NEVER effects/benefits/uses in a body. Read brain/compliance.md before writing." }
+
+  # ── On-page SEO for existing pages (Craig's "Pages" ask) ──────────────
+  - name: pages
+    label: "On-Page SEO"
+    label_singular: "Page"
+    description: "Meta + on-page copy for EXISTING pages (collections, products, landing). Keyed by URL. Same claim-free rules; the build injects these into the live page."
+    folder: "content/pages"
+    create: true
+    slug: "{{fields.page_id}}"
+    fields:
+      - { label: "Page ID", name: "page_id", widget: "string", hint: "short unique id, e.g. collections-peptides" }
+      - { label: "Target URL", name: "url", widget: "string", hint: "e.g. /collections/peptides.html or /products/bpc-157.html" }
+      - { label: "Meta title", name: "meta_title", widget: "string" }
+      - { label: "Meta description", name: "meta_description", widget: "text" }
+      - { label: "H1", name: "h1", widget: "string", required: false }
+      - { label: "Intro copy", name: "intro", widget: "markdown", required: false, hint: "Optional on-page intro. Product/identity facts only — no claims." }
