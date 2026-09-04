@@ -20,9 +20,9 @@ import json
 import subprocess
 import pathlib
 
-import anthropic
-
-MODEL = "claude-opus-5"
+# Runs through the Claude Code CLI on the owner's Max subscription (auth via the
+# CLAUDE_CODE_OAUTH_TOKEN secret) — no API key, no per-use credits.
+CLAUDE_MODEL = "opus"  # Claude Code model alias
 
 REVIEWER_SYSTEM = """You are the compliance reviewer for Explicit, a research-compound
 supplier. You gate SEO articles before they can be published.
@@ -91,26 +91,28 @@ def parse_verdict(raw: str) -> dict:
     return {"status": status, "summary": data.get("summary", ""), "findings": findings}
 
 
-def review_file(client, rules: str, catalog: str, path: str) -> dict:
+def review_file(rules: str, catalog: str, path: str) -> dict:
     article = pathlib.Path(path).read_text(encoding="utf-8")
-    user = (
-        "COMPLIANCE RULES (authoritative):\n" + rules +
+    prompt = (
+        REVIEWER_SYSTEM +
+        "\n\nCOMPLIANCE RULES (authoritative):\n" + rules +
         "\n\nPRODUCT CATALOG (the only products that exist):\n" + catalog +
         f"\n\nARTICLE TO REVIEW — {path}\n----- BEGIN -----\n" + article +
-        "\n----- END -----\nReturn the JSON verdict."
+        "\n----- END -----\nReturn ONLY the JSON verdict."
     )
-    resp = client.messages.create(
-        model=MODEL,
-        max_tokens=16000,
-        thinking={"type": "adaptive"},
-        system=[{
-            "type": "text",
-            "text": REVIEWER_SYSTEM,
-            "cache_control": {"type": "ephemeral"},
-        }],
-        messages=[{"role": "user", "content": user}],
+    proc = subprocess.run(
+        ["claude", "-p", prompt,
+         "--output-format", "json",
+         "--model", CLAUDE_MODEL,
+         "--dangerously-skip-permissions"],
+        capture_output=True, text=True, timeout=600,
     )
-    raw = "".join(b.text for b in resp.content if b.type == "text")
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"claude cli exited {proc.returncode}: {proc.stderr.strip()[:400]}"
+        )
+    outer = json.loads(proc.stdout)
+    raw = outer.get("result", "") if isinstance(outer, dict) else str(outer)
     verdict = parse_verdict(raw)
     verdict["path"] = path
     return verdict
@@ -166,11 +168,10 @@ def main() -> int:
         write_out(render_report([]), "PASS")
         return 0
 
-    client = anthropic.Anthropic()
     results = []
     for path in files:
         try:
-            results.append(review_file(client, rules, catalog, path))
+            results.append(review_file(rules, catalog, path))
         except Exception as e:  # noqa: BLE001 — any failure = fail-safe to human review
             results.append({
                 "path": path, "status": "fail",

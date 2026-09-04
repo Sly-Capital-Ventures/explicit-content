@@ -1,9 +1,11 @@
 name: Compliance Review
 
 # Runs on every PR that touches content/. Posts a plain-English report as a PR
-# comment and fails the check (blocking merge) if any claim is found. Same-repo
-# PRs (collaborators pushing a branch here) get the secret; fork PRs won't, and
-# then the agent can't run and the check fails safe — a human reviews.
+# comment and fails the check (blocking merge) if any claim is found. The review
+# runs through Claude Code on the owner's Max subscription (secret
+# CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`) — no API key, no credits.
+# Same-repo PRs (collaborators pushing a branch here) get the secret; fork PRs
+# won't, and then the agent can't run and the check fails safe — a human reviews.
 
 on:
   pull_request:
@@ -28,19 +30,19 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
+          node-version: '20'
 
-      - name: Install SDK
-        run: pip install --quiet 'anthropic>=0.40'
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
 
       - name: Run compliance review
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: python scripts/compliance_review.py
+        run: python3 scripts/compliance_review.py
 
       - name: Post / update review comment
         if: always()
