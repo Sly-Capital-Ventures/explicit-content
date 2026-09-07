@@ -20,7 +20,7 @@ Researchers and lab buyers sourcing reference-grade compounds — **not** consum
 
 ## Brand facts
 - Name: **Explicit** (research-compound supplier). RUO framing is always present.
-- Support: **support@explicitresearch.com**.
+- Support: **support@explicitsarms.com**.
 - Everything is **for laboratory and research use only** — carry that framing without making it the whole sentence.
 
 ## The tone test

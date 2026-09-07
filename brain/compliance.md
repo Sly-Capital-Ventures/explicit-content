@@ -1,4 +1,4 @@
-# Explicit Research — Content Compliance Ruleset
+# Explicit Sarms — Content Compliance Ruleset
 
 > This is the standard every article is **written to** and **reviewed against**. Both the authoring AI and the review agent use this exact file. If a line hints at what a compound does in a body, it does not publish. When unsure, treat it as a claim and cut it.
 
@@ -41,7 +41,7 @@ Describe the **compound and the product** — never its **effect, benefit, or us
 
 - RUO framing present; nothing implying human or animal use
 - No dosing or administration guidance
-- Correct brand + contact: **Explicit Research**, support **support@explicitresearch.com** (not support@explicitsarms.com)
+- Correct brand + contact: **Explicit Sarms** on **explicitsarms.com**, support **support@explicitsarms.com** — this content lives on explicitsarms.com, so use its brand, domain, and contact (not explicitresearch.com's). (Cross-links to the matching explicitresearch.com article are still encouraged — see `seo-conventions.md`.)
 - Purity / origin stated only where COA-substantiated; no fabricated availability or pricing
 
 ## Scope & high-risk buckets
