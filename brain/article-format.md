@@ -41,7 +41,7 @@ image: "<optional featured image path>"
 7. **Research-use disclaimer** (always): "For laboratory and research use only. Not for human or animal consumption."
 
 ## Scope
-Write only for **IN-SCOPE peptides** in `product-catalog.md`. SARMs, SERMs, AIs, and GLP compounds are excluded — do not write these unless explicitly approved.
+Write only for **IN-SCOPE compounds** in `product-catalog.md` (peptides, SARMs, SERMs). AIs, Rx-style items, and GLP compounds are excluded — do not write these unless explicitly approved.
 
 ## Length & depth
 Depth comes from **specs and accurate identity**, not word count. A tight, correct spec sheet beats a padded article. No filler, no fabricated facts to hit a length.

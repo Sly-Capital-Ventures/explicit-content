@@ -46,7 +46,8 @@ Describe the **compound and the product** — never its **effect, benefit, or us
 
 ## Scope & high-risk buckets
 
-- **SERMs, AIs, and SARMs are EXCLUDED** from the ER research-article library — do not write articles for them here. (See `article-format.md` for the in-scope compound list.)
+- **SARMs and SERMs are IN SCOPE** for the explicitsarms.com content library (listed in `product-catalog.md`) — the no-claims rules above apply to them exactly as to peptides: describe the compound and product (identity, chemistry, catalog + COA facts), never effects, benefits, dosing, or named conditions.
+- **AIs and Rx-style items (Anastrozole, Exemestane, Letrozole, Sildenafil) remain EXCLUDED** pending Max + counsel sign-off. (See `article-format.md` for the in-scope list.)
 - **GLP compounds — reta / tirzepatide — were legally pulled.** Never write about, list, or reference them.
 - **Blends** (e.g. BPC-157 / TB-500): name the ingredients only. No combined-effect claims, no per-ingredient "studied for…" notes.
 
