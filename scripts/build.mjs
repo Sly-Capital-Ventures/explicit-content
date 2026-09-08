@@ -11,7 +11,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = "https://explicitsarms.com";
@@ -270,26 +270,31 @@ function buildIndex(items) {
   return true;
 }
 
-// ---------- run ----------
-rmSync(OUT, { recursive: true, force: true });
-mkdirSync(OUT_ARTICLES, { recursive: true });
+// Exported so scripts/preview.mjs renders with the EXACT same logic (no drift between preview & build).
+export { renderArticle, parseFrontmatter, SITE };
 
-const files = readdirSync(ARTICLES_SRC).filter((f) => f.endsWith(".md") && !f.startsWith("_"));
-const built = [];
-for (const f of files) {
-  const raw = readFileSync(join(ARTICLES_SRC, f), "utf8");
-  const { meta, body } = parseFrontmatter(raw);
-  if (!meta.slug || !meta.title) {
-    console.warn(`! skipping ${f} — missing slug or title`);
-    continue;
+// ---------- run (only when invoked directly: `node scripts/build.mjs` — NOT when imported) ----------
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  rmSync(OUT, { recursive: true, force: true });
+  mkdirSync(OUT_ARTICLES, { recursive: true });
+
+  const files = readdirSync(ARTICLES_SRC).filter((f) => f.endsWith(".md") && !f.startsWith("_"));
+  const built = [];
+  for (const f of files) {
+    const raw = readFileSync(join(ARTICLES_SRC, f), "utf8");
+    const { meta, body } = parseFrontmatter(raw);
+    if (!meta.slug || !meta.title) {
+      console.warn(`! skipping ${f} — missing slug or title`);
+      continue;
+    }
+    writeFileSync(join(OUT_ARTICLES, `${meta.slug}.html`), renderArticle(meta, body), "utf8");
+    built.push(meta);
+    console.log(`✓ articles/${meta.slug}.html`);
   }
-  writeFileSync(join(OUT_ARTICLES, `${meta.slug}.html`), renderArticle(meta, body), "utf8");
-  built.push(meta);
-  console.log(`✓ articles/${meta.slug}.html`);
-}
 
-built.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
-writeFileSync(join(OUT, "feed.xml"), buildFeed(built), "utf8");
-console.log(`✓ feed.xml (${built.length} item${built.length === 1 ? "" : "s"})`);
-if (buildIndex(built)) console.log("✓ articles.html (index regenerated)");
-console.log(`\nBuilt ${built.length} article(s) into dist/`);
+  built.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  writeFileSync(join(OUT, "feed.xml"), buildFeed(built), "utf8");
+  console.log(`✓ feed.xml (${built.length} item${built.length === 1 ? "" : "s"})`);
+  if (buildIndex(built)) console.log("✓ articles.html (index regenerated)");
+  console.log(`\nBuilt ${built.length} article(s) into dist/`);
+}
