@@ -17,8 +17,27 @@ import os
 import re
 import sys
 import json
+import shutil
 import subprocess
 import pathlib
+
+
+def _claude_cmd():
+    """Build the claude-CLI argv portably. The prompt is fed on STDIN (not argv) because it's far larger
+    than Windows' ~8 KB command-line limit. Linux/CI: bare `claude` on PATH. Windows: the npm shim is
+    `claude.cmd`, which CreateProcess can't exec directly, so run it through `cmd /c`. Override the
+    binary with the CLAUDE_BIN env var if needed."""
+    args = ["-p", "--output-format", "json", "--model", CLAUDE_MODEL, "--dangerously-skip-permissions"]
+    override = os.environ.get("CLAUDE_BIN")
+    if override:
+        binary = override
+    elif os.name == "nt":
+        binary = shutil.which("claude.cmd") or shutil.which("claude") or "claude.cmd"
+    else:
+        binary = shutil.which("claude") or "claude"
+    if os.name == "nt" and str(binary).lower().endswith(".cmd"):
+        return ["cmd", "/c", binary] + args
+    return [binary] + args
 
 # Runs through the Claude Code CLI on the owner's Max subscription (auth via the
 # CLAUDE_CODE_OAUTH_TOKEN secret) — no API key, no per-use credits.
@@ -101,11 +120,8 @@ def review_file(rules: str, catalog: str, path: str) -> dict:
         "\n----- END -----\nReturn ONLY the JSON verdict."
     )
     proc = subprocess.run(
-        ["claude", "-p", prompt,
-         "--output-format", "json",
-         "--model", CLAUDE_MODEL,
-         "--dangerously-skip-permissions"],
-        capture_output=True, text=True, timeout=600,
+        _claude_cmd(),
+        input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=600,
     )
     if proc.returncode != 0:
         raise RuntimeError(

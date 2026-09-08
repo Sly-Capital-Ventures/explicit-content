@@ -24,6 +24,11 @@ import compliance_review as cr  # noqa: E402
 
 
 def main() -> int:
+    # The report contains emoji (🔴/🟢); Windows consoles default to cp1252 and would crash on them.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     if len(sys.argv) < 2:
         print("usage: python3 scripts/review_local.py <path-to-article.md>")
         return 1
