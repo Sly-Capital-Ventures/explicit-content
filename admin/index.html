@@ -9,5 +9,10 @@
   <!-- Sveltia CMS: a WordPress-style editor that commits to this GitHub repo.
        It auto-loads ./config.yml from this same folder. Pin an exact @version before go-live. -->
   <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
+
+  <!-- In-editor Compliance & SEO panel. Set REVIEW_WORKER_URL to the deployed status Worker
+       (see worker/README.md), then the panel shows each entry's CI verdict inline. -->
+  <script>window.REVIEW_WORKER_URL = "https://explicit-content-review.CHANGE-ME.workers.dev";</script>
+  <script src="./review-panel.js"></script>
 </body>
 </html>

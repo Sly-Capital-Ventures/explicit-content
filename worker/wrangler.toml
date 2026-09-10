@@ -1,0 +1,18 @@
+# Read-only status relay for the in-editor compliance/SEO panel.
+# It exposes GET /status?branch=cms/<collection>/<slug> and returns the PR's check status +
+# the REVIEW_JSON verdict, using a read-only fine-grained PAT. No write scope, one repo.
+#
+# Deploy:
+#   cd worker
+#   wrangler secret put GITHUB_TOKEN     # paste the fine-grained PAT (see worker/README.md)
+#   wrangler deploy
+# Then point the panel's WORKER_URL (admin/review-panel.js) at the deployed URL.
+
+name = "explicit-content-review"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+REPO = "Sly-Capital-Ventures/explicit-content"
+ALLOWED_ORIGIN = "https://seo.explicitsarms.com"
+# GITHUB_TOKEN is a SECRET — never put it here. Set it with: wrangler secret put GITHUB_TOKEN
