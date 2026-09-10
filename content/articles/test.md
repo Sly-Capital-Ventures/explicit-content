@@ -8,4 +8,4 @@ image: /uploads/BPC-157 5 MG.webp
 date: 2026-09-10T12:12:00
 ---
 
-"BPC-157 supports faster recovery and reduces inflammation."
+"BPC-157 is a peptide"
