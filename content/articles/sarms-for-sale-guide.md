@@ -1,7 +1,7 @@
 ---
 title: SARMs vs Traditional Research Compounds
 slug: sarms-for-sale-guide
-meta_title: SARMs for Sale and Research Compound Guide
+meta_title: SARMs for Sale and Research Compound Guid
 meta_description: Learn about sarms for sale, compound comparisons, legal considerations, and how to buy sarms online from trusted research platforms.
 focus_keyword: sarms for sale
 image: https://explicitsrms.com/wp-content/uploads/2026/06/explicit-sarms-RAD-140-1526x1536-1-1017x1024.jpg
