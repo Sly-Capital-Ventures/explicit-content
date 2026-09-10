@@ -1,7 +1,7 @@
 ---
 title: BPC-157 and how it works
 slug: test
-meta_title: cancer
+meta_title: BPC-157
 meta_description: how to ride a bike
 focus_keyword: ''
 image: /uploads/BPC-157 5 MG.webp
