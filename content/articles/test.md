@@ -1,5 +1,5 @@
 ---
-title: How to inject bpc-157
+title: BPC-157 and how it works
 slug: test
 meta_title: cancer
 meta_description: how to ride a bike
