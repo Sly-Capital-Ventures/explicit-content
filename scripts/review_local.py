@@ -40,14 +40,15 @@ def main() -> int:
     root = pathlib.Path(__file__).resolve().parent.parent
     try:
         rules = (root / "brain" / "compliance.md").read_text(encoding="utf-8")
+        seo = (root / "brain" / "seo-conventions.md").read_text(encoding="utf-8")
         catalog = (root / "brain" / "product-catalog.md").read_text(encoding="utf-8")
     except OSError as e:
         print(f"could not read the ruleset from brain/ (run from the repo root): {e}")
         return 1
 
-    print(f"Reviewing {path} against the current working-tree brain/ ...\n")
+    print(f"Reviewing {path} against the current working-tree brain/ (compliance + SEO) ...\n")
     try:
-        verdict = cr.review_file(rules, catalog, path)
+        verdict = cr.review_file(rules, seo, catalog, path)
     except Exception as e:  # noqa: BLE001 — surface any claude-cli / parse failure plainly
         print(f"reviewer could not run: {e}")
         print("(is the `claude` CLI installed and signed in? this runs `claude -p` locally.)")
