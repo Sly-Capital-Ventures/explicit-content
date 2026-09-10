@@ -9,7 +9,7 @@
  * Zero dependencies: the article format is constrained (see brain/article-format.md),
  * so a small, predictable Markdown subset renderer is used on purpose.
  */
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -278,7 +278,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   rmSync(OUT, { recursive: true, force: true });
   mkdirSync(OUT_ARTICLES, { recursive: true });
 
-  const files = readdirSync(ARTICLES_SRC).filter((f) => f.endsWith(".md") && !f.startsWith("_"));
+  const files = existsSync(ARTICLES_SRC) ? readdirSync(ARTICLES_SRC).filter((f) => f.endsWith(".md") && !f.startsWith("_")) : [];
   const built = [];
   for (const f of files) {
     const raw = readFileSync(join(ARTICLES_SRC, f), "utf8");
