@@ -1,7 +1,7 @@
 ---
 title: BPC-152
-slug: test
-meta_title: new article
+slug: bpc-152
+meta_title: bpc-152
 meta_description: test
 focus_keyword: test
 image: ''
