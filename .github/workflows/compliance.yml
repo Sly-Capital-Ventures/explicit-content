@@ -10,8 +10,8 @@ name: Compliance Review
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'content/**'
+  # Runs on EVERY PR (not just content/**): the reviewer auto-passes when no article changed,
+  # so the required "compliance" check still appears on tooling PRs and doesn't block their merge.
 
 permissions:
   contents: read
@@ -25,14 +25,14 @@ jobs:
   compliance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code

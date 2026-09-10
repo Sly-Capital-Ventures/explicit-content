@@ -157,7 +157,14 @@
           schedule(branch); return;
         }
         if (!data.review) {
-          showMessage("wait", "Checking…", "The compliance & SEO review is running (about 1–2 minutes). This updates on its own.");
+          // Only say "Checking…" when a review is genuinely running. If no check has run yet
+          // (an entry not saved since the reviewer went live, or a brand-new draft), tell the
+          // writer to Save — otherwise the panel sits on "Checking…" forever with nothing coming.
+          if (data.checkStatus === "queued" || data.checkStatus === "in_progress") {
+            showMessage("wait", "Checking…", "The compliance & SEO review is running (about 1–2 minutes). This updates on its own.");
+          } else {
+            showMessage("wait", "Not reviewed yet", "Save this entry to run the compliance & SEO review — it takes ~1–2 minutes after you Save, then updates here on its own.");
+          }
           schedule(branch); return;
         }
         var fail = data.review.status === "fail";
